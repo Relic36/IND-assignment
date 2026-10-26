@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floating Photovoltaic (FPV) Power Station </title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- External CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<!-- Chosen Palette: Slate & Oceanic Cyan (Warm Slate #f8fafc, Deep Slate #0f172a, Teal #0d9488, Cyan #0284c7, Amber #d97706) -->
+<!-- Application Structure Plan: 
+     1. Executive Header & KPI Ticker: Displays global potential, 2033 capacity, thermal efficiency gain, and water conservation metrics.
+     2. Main Interactive Navigation (5 Thematic Modules):
+        - Section 1: Comparative Analysis & System Overview (GPV vs FPV toggle, Case Studies Explorer).
+        - Section 2: Subsystem Engineering Architecture (HDPE Polymer Chemistry, Mooring Systems Explorer, Electrical & Submarine Cables).
+        - Section 3: Hydrodynamic & Thermodynamic Simulation (Live Thermodynamic Yield Calculator, 6-DOF Wave Motion Analysis, Chart.js Efficiency Visualizer).
+        - Section 4: Economic Viability & Market Trajectory (CAPEX Doughnut Chart, LCOE Sensitivity Model, 2022-2033 Global Market Forecast).
+        - Section 5: Ecotoxicology, O&M & FMEA Risk Matrix (FMEA Risk Assessment Cards, Robotic O&M Showcase, Ecological Environmental Impact Model).
+     3. Responsive Footer with standards references (DNV-RP-0584, IEC 61701/62804).
+     This non-linear interactive layout allows domain experts, investors, and engineers to explore complex multidimensional data intuitively rather than reading a static text wall. -->
+<!-- Visualization & Content Choices:
+     - Temperature vs Efficiency: Chart.js Line Chart -> Displays dynamic convective cooling benefits of water vs ground mount.
+     - Hydrodynamic 6-DOF Wave Spectrum: Chart.js Radar Chart -> Illustrates motion response in Surge, Heave, Pitch, Roll, Yaw under potential flow theory.
+     - CAPEX Allocation: Chart.js Doughnut Chart -> Visually breaks down SBOS, EBOS, Modules, and Marine Installation costs.
+     - Global Market Projections: Chart.js Stacked Bar Chart -> Demonstrates regional shift toward APAC dominance (77 GW by 2033).
+     - Live Thermodynamic Simulator: Custom JS math engine -> Dynamically computes power gains and water saved based on user input.
+     - ALL Icons are Unicode / Styled CSS elements to strictly adhere to NO SVG mandate. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- TOP HEADER & BRANDING -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <span class="text-3xl">🌊</span>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            FloatoVolt <span
+              class="bg-cyan-500/20 text-cyan-300 text-xs px-2 py-0.5 rounded border border-cyan-500/30 font-semibold">FPV
+              Analytics v2.6</span>
+          </h1>
+          <p class="text-xs text-slate-400">Floating Photovoltaic Engineering, Hydrodynamic & Economics Platform</p>
+        </div>
+      </div>
+
+      <!-- Key Metric Quick Indicators -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60">
+          <div class="text-slate-400">Global Potential</div>
+          <div class="text-sm font-bold text-cyan-400">22 TWp <span
+              class="text-[10px] font-normal text-slate-400">Inland</span></div>
+        </div>
+        <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60">
+          <div class="text-slate-400">2033 Projection</div>
+          <div class="text-sm font-bold text-teal-400">77 GW <span
+              class="text-[10px] font-normal text-slate-400">Capacity</span></div>
+        </div>
+        <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60">
+          <div class="text-slate-400">Efficiency Boost</div>
+          <div class="text-sm font-bold text-amber-400">+2.5% to 15%</div>
+        </div>
+        <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60">
+          <div class="text-slate-400">Evaporation Cut</div>
+          <div class="text-sm font-bold text-blue-400">20% - 33%</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-[61px] z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex space-x-1 sm:space-x-4 overflow-x-auto py-2 scrollbar-none" id="tabContainer">
+        <button onclick="switchTab('overview')" id="tab-overview"
+          class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md bg-cyan-600 text-white whitespace-nowrap shadow-sm">
+          📊 Executive Overview
+        </button>
+        <button onclick="switchTab('engineering')" id="tab-engineering"
+          class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap">
+          ⚙️ Engineering Architecture
+        </button>
+        <button onclick="switchTab('simulation')" id="tab-simulation"
+          class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap">
+          ⚡ Dynamic Yield Simulator
+        </button>
+        <button onclick="switchTab('economics')" id="tab-economics"
+          class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap">
+          📈 Economics & Markets
+        </button>
+        <button onclick="switchTab('ecotox')" id="tab-ecotox"
+          class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap">
+          🛡️ FMEA & Ecological Risks
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- MODULE 1: EXECUTIVE OVERVIEW & COMPARISON -->
+    <section id="sec-overview" class="space-y-6">
+      <!-- Introductory Context Block -->
+      <div
+        class="bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 rounded-xl p-6 text-white shadow-md border border-slate-800">
+        <h2 class="text-xl sm:text-2xl font-bold mb-2 text-cyan-300">Floating Solar Power Stations: The Water-Energy
+          Nexus</h2>
+        <p class="text-sm text-slate-300 leading-relaxed max-w-4xl">
+          Floating Photovoltaic (FPV) technology decouples utility-scale solar energy from terrestrial land constraints
+          by deploying engineered arrays on reservoirs, hydroelectric dams, and coastal waters. Generating up to 1.6
+          hectares of land savings per MW installed, FPV leverages convective water cooling to enhance conversion
+          efficiency while simultaneously preserving critical water resources through evaporation suppression.
+        </p>
+      </div>
+
+      <!-- GPV vs FPV Comparison Interactive Toggle Module -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 card-hover">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              ⚖️ Comparative Benchmark: Terrestrial (GPV) vs Floating (FPV)
+            </h3>
+            <p class="text-xs text-slate-500">Select parameters to examine technical trade-offs between land-based and
+              water-based deployments.</p>
+          </div>
+          <div class="flex items-center space-x-2 bg-slate-100 p-1 rounded-lg">
+            <button onclick="filterComparison('all')" id="btn-comp-all"
+              class="px-3 py-1 text-xs font-semibold rounded bg-white text-slate-800 shadow-sm">All Metrics</button>
+            <button onclick="filterComparison('advantages')" id="btn-comp-adv"
+              class="px-3 py-1 text-xs font-semibold rounded text-slate-600 hover:text-slate-900">FPV
+              Advantages</button>
+            <button onclick="filterComparison('challenges')" id="btn-comp-chal"
+              class="px-3 py-1 text-xs font-semibold rounded text-slate-600 hover:text-slate-900">FPV
+              Challenges</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="comparisonCardsGrid">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Global Case Studies Explorer -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 card-hover">
+        <div class="mb-4">
+          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            🌍 Flagship Global FPV Installations & Benchmark Case Studies
+          </h3>
+          <p class="text-xs text-slate-500">Click any project card to inspect structural engineering specifications,
+            water variance handling, and environmental benefits.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="projectsGrid">
+          <!-- Project Cards standard JS injection -->
+        </div>
+
+        <!-- Project Detail Modal/Expandable Box -->
+        <div id="projectDetailBox" class="hidden mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+          <!-- Dynamic details filled by JS -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- MODULE 2: SUBSYSTEM ENGINEERING ARCHITECTURE -->
+    <section id="sec-engineering" class="hidden space-y-6">
+      <div class="bg-slate-900 text-white p-5 rounded-xl border border-slate-800">
+        <h2 class="text-lg sm:text-xl font-bold text-teal-300 mb-1">Structural & Marine Subsystem Architecture</h2>
+        <p class="text-xs text-slate-300">
+          FPV installations represent complex marine floating structures operating under coupled hydrodynamic and
+          aerodynamic loading. The section details high-density polyethylene (HDPE) polymer compounding, station-keeping
+          mooring configurations, and 1500V DC submarine electrical design.
+        </p>
+      </div>
+
+      <!-- Subsystem Interactive Tabs -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Tab 1: Buoyancy & Polymer Chemistry -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+            <h3 class="font-bold text-slate-900 flex items-center gap-2">
+              🧪 HDPE Polymer Chemistry
+            </h3>
+            <span class="text-xs font-mono bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded font-semibold">25-50 Yr
+              Service</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Floating pontoons utilize High-Density Polyethylene (HDPE) with a density of 0.941–0.960 g/cm³ and 60-80%
+            crystallinity. To prevent photo-oxidative degradation under intense UV solar exposure, resins are compounded
+            during extrusion with:
+          </p>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-slate-50 rounded border border-slate-200">
+              <span class="font-bold text-slate-800">Carbon Black (2.0% - 3.0% mass)</span>
+              <p class="text-slate-600 mt-0.5">22 nm (± 3nm) particle size absorbs >99.5% of incident UV photons,
+                converting them into thermal energy within the top 0.05mm layer.</p>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded border border-slate-200">
+              <span class="font-bold text-slate-800">Zinc Oxide (ZnO) & HALS</span>
+              <p class="text-slate-600 mt-0.5">Hindered Amine Light Stabilizers actively scavenge free radicals,
+                extending Oxidative Induction Time (OIT) beyond 400 mins at 90°C.</p>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded border border-slate-200">
+              <span class="font-bold text-slate-800">Buoyancy Safety Reserve Factor</span>
+              <p class="text-slate-600 mt-0.5">Designed to withstand a minimum 2.5x total dead load safety factor
+                (modules, aluminum rails, fasteners, and heavy cabling).</p>
+            </div>
+          </div>
+
+          <!-- Material Matrix Comparison Table -->
+          <div class="overflow-x-auto pt-2">
+            <table class="w-full text-[11px] text-left text-slate-600 border border-slate-200 rounded">
+              <thead class="bg-slate-100 text-slate-800 font-bold">
+                <tr>
+                  <th class="p-1.5 border-b">Material</th>
+                  <th class="p-1.5 border-b">UV Res</th>
+                  <th class="p-1.5 border-b">Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b">
+                  <td class="p-1.5 font-semibold">HDPE + CB</td>
+                  <td class="p-1.5 text-emerald-600">Excellent</td>
+                  <td class="p-1.5">Baseline</td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-1.5 font-semibold">FRP Composite</td>
+                  <td class="p-1.5 text-emerald-600">Excellent</td>
+                  <td class="p-1.5 text-amber-600">+15-25%</td>
+                </tr>
+                <tr>
+                  <td class="p-1.5 font-semibold">Silicone Membrane</td>
+                  <td class="p-1.5 text-blue-600">High</td>
+                  <td class="p-1.5">Medium</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Mooring & Station Keeping Interactive Explorer -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 lg:col-span-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 border-slate-100 gap-2">
+            <div>
+              <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                ⚓ Station-Keeping & Mooring System Selector
+              </h3>
+              <p class="text-xs text-slate-500">Governed by DNV-RP-0584 standards (Safety Factor 1.67 intact, 1.25
+                damaged line).</p>
+            </div>
+            <div class="flex flex-wrap gap-1" id="mooringTabButtons">
+              <!-- Buttons populated by JS -->
+            </div>
+          </div>
+
+          <!-- Dynamic Mooring Info Box -->
+          <div id="mooringDetailDisplay" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            <!-- Dynamic Injection -->
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+            <div class="bg-blue-50/70 border border-blue-200 p-3 rounded-lg">
+              <span class="font-bold text-blue-900 block mb-1">🌊 Dynamic Reservoir Water Level Variance</span>
+              <p class="text-slate-700 leading-snug">
+                Hydroelectric reservoirs frequently experience seasonal water depth shifts of 10 to 15 meters between
+                monsoon and dry cycles. Catenary and compliant systems payout or pick up seabed line dynamically to
+                prevent extreme tension spikes.
+              </p>
+            </div>
+            <div class="bg-teal-50/70 border border-teal-200 p-3 rounded-lg">
+              <span class="font-bold text-teal-900 block mb-1">⚡ Dynamic Submarine Power Cabling</span>
+              <p class="text-slate-700 leading-snug">
+                Utilizes cross-linked polyethylene (XLPE) with water-blocking lead sheaths and articulated steel wire
+                armor. Bend stiffeners at floating inverter drops prevent bending radius violation and fatigue-induced
+                shear.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Electrical Architecture Specs Banner -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 mb-3 text-sm flex items-center gap-2">
+          ⚡ Marine Electrical & Ingress Protection Specifications (1500V DC Infrastructure)
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+          <div class="border border-slate-200 p-3 rounded-lg bg-slate-50">
+            <div class="text-slate-500 font-semibold mb-1">Ingress Protection</div>
+            <div class="text-base font-bold text-slate-800">IP68 Rated</div>
+            <p class="text-slate-600 mt-1">MC4 connectors, junction boxes, and dynamic array splitters are fully
+              submersible.</p>
+          </div>
+          <div class="border border-slate-200 p-3 rounded-lg bg-slate-50">
+            <div class="text-slate-500 font-semibold mb-1">Salt Mist Certification</div>
+            <div class="text-base font-bold text-slate-800">IEC 61701</div>
+            <p class="text-slate-600 mt-1">Severity level 6 testing ensures resistance to continuous salt fog and marine
+              mist corrosion.</p>
+          </div>
+          <div class="border border-slate-200 p-3 rounded-lg bg-slate-50">
+            <div class="text-slate-500 font-semibold mb-1">PID Immunity</div>
+            <div class="text-base font-bold text-slate-800">IEC 62804</div>
+            <p class="text-slate-600 mt-1">Prevents Potential-Induced Degradation driven by extreme humidity and 1500V
+              voltage bias.</p>
+          </div>
+          <div class="border border-slate-200 p-3 rounded-lg bg-slate-50">
+            <div class="text-slate-500 font-semibold mb-1">Hydro-Solar Interconnect</div>
+            <div class="text-base font-bold text-slate-800">HVAC Grid Tie</div>
+            <p class="text-slate-600 mt-1">Directly utilizes dam substation capacity, saving multi-million dollar
+              transmission builds.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- MODULE 3: HYDRODYNAMIC & THERMODYNAMIC SIMULATION ENGINE -->
+    <section id="sec-simulation" class="hidden space-y-6">
+      <div class="bg-slate-900 text-white p-5 rounded-xl border border-slate-800">
+        <h2 class="text-lg sm:text-xl font-bold text-amber-400 mb-1">Hydrodynamic & Thermodynamic Performance Engine
+        </h2>
+        <p class="text-xs text-slate-300">
+          This module models potential flow theory (ANSYS-AQWA / OrcaFlex) for dynamic wave excitation along with
+          empirical convective cooling heat transfer gains ($\Delta P = \beta \cdot \Delta T$).
+        </p>
+      </div>
+
+      <!-- Live Interactive Thermodynamic & Water Conservation Calculator -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm card-hover">
+        <div class="border-b pb-3 border-slate-100 mb-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            🧮 Live FPV Yield & Water Conservation Interactive Calculator
+          </h3>
+          <p class="text-xs text-slate-500">Adjust site environmental parameters to estimate cooling efficiency gain,
+            annual revenue bonus, and evaporative water volume saved.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Input Controls (5 cols) -->
+          <div class="lg:col-span-5 space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+            <div>
+              <div class="flex justify-between font-bold text-slate-700 mb-1">
+                <label for="inputCapacity">Installed Array Capacity (MWp):</label>
+                <span id="valCapacity" class="text-cyan-700">50 MW</span>
+              </div>
+              <input type="range" id="inputCapacity" min="5" max="300" step="5" value="50" oninput="updateCalculator()"
+                class="w-full accent-cyan-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between font-bold text-slate-700 mb-1">
+                <label for="inputTemp">Peak Ambient Temperature (°C):</label>
+                <span id="valTemp" class="text-amber-700">35 °C</span>
+              </div>
+              <input type="range" id="inputTemp" min="20" max="48" step="1" value="35" oninput="updateCalculator()"
+                class="w-full accent-amber-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between font-bold text-slate-700 mb-1">
+                <label for="inputWind">Average Surface Wind Speed (m/s):</label>
+                <span id="valWind" class="text-teal-700">3.5 m/s</span>
+              </div>
+              <input type="range" id="inputWind" min="0.5" max="10" step="0.5" value="3.5" oninput="updateCalculator()"
+                class="w-full accent-teal-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between font-bold text-slate-700 mb-1">
+                <label for="inputTariff">Power Feed-in Tariff ($/kWh):</label>
+                <span id="valTariff" class="text-emerald-700">$0.065 / kWh</span>
+              </div>
+              <input type="range" id="inputTariff" min="0.03" max="0.15" step="0.005" value="0.065"
+                oninput="updateCalculator()" class="w-full accent-emerald-600">
+            </div>
+          </div>
+
+          <!-- Output Metrics Cards (7 cols) -->
+          <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              class="bg-gradient-to-br from-cyan-500 to-blue-600 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs uppercase tracking-wider text-cyan-100 font-semibold">Temperature Reduction</span>
+                <div id="calcCoolingDelta" class="text-3xl font-black mt-1">--</div>
+              </div>
+              <p class="text-[11px] text-cyan-100 mt-2">Convective water heat sink cools modules vs identical ground
+                mounts.</p>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs uppercase tracking-wider text-amber-100 font-semibold">Annual Energy Generation
+                  Boost</span>
+                <div id="calcEnergyBoost" class="text-3xl font-black mt-1">--</div>
+              </div>
+              <p class="text-[11px] text-amber-100 mt-2">Based on -0.45%/°C temperature coefficient ($\beta$)
+                correction.</p>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs uppercase tracking-wider text-emerald-100 font-semibold">Annual Evaporation
+                  Savings</span>
+                <div id="calcWaterSaved" class="text-3xl font-black mt-1">--</div>
+              </div>
+              <p class="text-[11px] text-emerald-100 mt-2">Retained water volume (suppressing 20%-33% evaporative loss).
+              </p>
+            </div>
+
+            <div
+              class="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs uppercase tracking-wider text-slate-300 font-semibold">Added Annual Revenue</span>
+                <div id="calcRevenueSurplus" class="text-3xl font-black text-amber-400 mt-1">--</div>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-2">Direct yield bonus monetized at local feed-in tariff rate.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW: Temperature Efficiency & 6-DOF Wave Response -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Chart 1 Container -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              📉 Module Temperature vs Solar Irradiance (GPV vs FPV)
+            </h3>
+            <p class="text-xs text-slate-500">Illustrates operational cell temperature difference and efficiency
+              retention under high irradiance.</p>
+          </div>
+          <div class="chart-container">
+            <canvas id="tempEfficiencyChart"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-500 text-center mt-2 italic">Data calculated using Nusselt number convective
+            heat balance models.</p>
+        </div>
+
+        <!-- Chart 2 Container -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              🌊 Hydrodynamic Motion Response Spectrum (6-Degrees of Freedom)
+            </h3>
+            <p class="text-xs text-slate-500">Dynamic excitation comparison based on Potential Flow Theory (ANSYS-AQWA)
+              boundary element method.</p>
+          </div>
+          <div class="chart-container">
+            <canvas id="hydrodynamicChart"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-500 text-center mt-2 italic">Surge, Heave, and Pitch represent primary
+            dynamic structural risk vectors.</p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- MODULE 4: ECONOMICS & MARKET DYNAMICS -->
+    <section id="sec-economics" class="hidden space-y-6">
+      <div class="bg-slate-900 text-white p-5 rounded-xl border border-slate-800">
+        <h2 class="text-lg sm:text-xl font-bold text-teal-300 mb-1">Financial Analysis, LCOE & Global Market Dynamics
+        </h2>
+        <p class="text-xs text-slate-300">
+          Evaluating the initial 20%-35% FPV CAPEX premium against land acquisition offset, Levelized Cost of
+          Electricity ($0.053 - $0.063/kWh), and global expansion projections to 77 GW by 2033.
+        </p>
+      </div>
+
+      <!-- CHARTS ROW: CAPEX Breakdown & Market Growth -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Chart 3: CAPEX Structure Breakdown -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              💰 Utility-Scale FPV Capital Expenditure Breakdown (CAPEX)
+            </h3>
+            <p class="text-xs text-slate-500">Highlighting Structural (SBOS) and Marine Balance-of-System cost drivers.
+            </p>
+          </div>
+          <div class="chart-container">
+            <canvas id="capexChart"></canvas>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-[11px] mt-3 pt-3 border-t border-slate-100">
+            <div class="bg-slate-50 p-2 rounded">
+              <span class="font-bold text-slate-800 block">Modules (52-55%)</span>
+              <span class="text-slate-500">Double-glass, PID/Salt-mist certified</span>
+            </div>
+            <div class="bg-slate-50 p-2 rounded">
+              <span class="font-bold text-slate-800 block">SBOS Structural (23-24%)</span>
+              <span class="text-slate-500">HDPE floats, anchors, chains</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 4: Regional Market Forecast -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="mb-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              📊 Cumulative Global FPV Market Growth Projections (2022 - 2033 GW)
+            </h3>
+            <p class="text-xs text-slate-500">Data synthesized from Wood Mackenzie & BloombergNEF industry models.</p>
+          </div>
+          <div class="chart-container">
+            <canvas id="marketChart"></canvas>
+          </div>
+          <div class="bg-cyan-50 border border-cyan-200 p-2.5 rounded text-[11px] text-cyan-900 mt-3">
+            <strong>APAC Dominance:</strong> The Asia-Pacific region accounts for 81%+ of total global demand (~57 GW)
+            due to high population density and stringent land protection laws in India, China, and Indonesia.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Financial Metrics Summary Grid -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 mb-4 text-sm flex items-center gap-2">
+          💵 Levelized Cost of Electricity (LCOE) & Tariff Drivers
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div class="border border-slate-200 p-4 rounded-xl bg-slate-50">
+            <div class="text-slate-500 font-semibold">Global LCOE Range</div>
+            <div class="text-2xl font-black text-slate-900 my-1">$0.053 - $0.063 <span class="text-xs font-normal">/
+                kWh</span></div>
+            <p class="text-slate-600">Highly competitive in land-scarce jurisdictions where terrestrial land prep
+              consumes up to 50% of CAPEX.</p>
+          </div>
+
+          <div class="border border-slate-200 p-4 rounded-xl bg-slate-50">
+            <div class="text-slate-500 font-semibold">India Tariff Benchmark</div>
+            <div class="text-2xl font-black text-teal-700 my-1">₹3.63 <span class="text-xs font-normal">/ kWh</span>
+            </div>
+            <p class="text-slate-600">Competitive state bidding reflects a ~33% premium over ground solar (₹2.72/kWh)
+              offset by water retention value.</p>
+          </div>
+
+          <div class="border border-slate-200 p-4 rounded-xl bg-slate-50">
+            <div class="text-slate-500 font-semibold">Hydro Energy Arbitrage</div>
+            <div class="text-2xl font-black text-amber-600 my-1">+4% to +8% <span
+                class="text-xs font-normal">Revenue</span></div>
+            <p class="text-slate-600">Hydro-solar hybridization allows daytime water retention for peak evening dispatch
+              or pumped storage pumping.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- MODULE 5: ECOTOXICOLOGY & FMEA RISK MATRIX -->
+    <section id="sec-ecotox" class="hidden space-y-6">
+      <div class="bg-slate-900 text-white p-5 rounded-xl border border-slate-800">
+        <h2 class="text-lg sm:text-xl font-bold text-rose-400 mb-1">Ecotoxicology, Autonomous O&M & FMEA Risk Matrix
+        </h2>
+        <p class="text-xs text-slate-300">
+          Failure Mode and Effects Analysis (FMEA) alongside limnological ecosystem impacts including thermal
+          stratification, microplastic shedding, and heavy metal leaching.
+        </p>
+      </div>
+
+      <!-- FMEA Interactive Risk Cards Grid -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 border-slate-100 mb-4 gap-2">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              ⚠️ Structural & Environmental Failure Mode Analysis (FMEA)
+            </h3>
+            <p class="text-xs text-slate-500">Filter by severity level to examine root causes and engineering
+              mitigations.</p>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <button onclick="filterFMEA('all')" id="fmea-btn-all"
+              class="px-2.5 py-1 font-semibold rounded bg-slate-800 text-white">All Risks</button>
+            <button onclick="filterFMEA('high')" id="fmea-btn-high"
+              class="px-2.5 py-1 font-semibold rounded bg-rose-100 text-rose-800">High Risk</button>
+            <button onclick="filterFMEA('medium')" id="fmea-btn-med"
+              class="px-2.5 py-1 font-semibold rounded bg-amber-100 text-amber-800">Medium Risk</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="fmeaGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- O&M Robotics Showcase & Ecological Impact Model -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- O&M Robotics -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="border-b pb-3 border-slate-100">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              🤖 Autonomous Robotic Dry-Brush O&M
+            </h3>
+            <p class="text-xs text-slate-500">Solving severe avian biological soiling without water logistics.</p>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Persistent high humidity combined with bird droppings accelerates micro-shading hotspots. FPV requires
+            double the cleaning frequency of terrestrial solar. Modern O&M utilizes AI-driven autonomous dry-brush
+            robotics:
+          </p>
+
+          <div class="space-y-2 text-xs">
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-800 block">Dry Microfiber & Compressed Air</span>
+              <p class="text-slate-600 mt-0.5">Eliminates fresh water consumption while protecting anti-reflective
+                module coatings from scratches.</p>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-800 block">IoT & SCADA Edge Analytics</span>
+              <p class="text-slate-600 mt-0.5">Triggers cleaning cycles dynamically only when string generation drops
+                below a 3-5% efficiency threshold.</p>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-800 block">Submarine ROV Hull & Cable Inspection</span>
+              <p class="text-slate-600 mt-0.5">Remotely Operated Vehicles inspect deep-water anchors and detect quagga
+                mussel biofouling mass buildup.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ecotoxicology & Limnology -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="border-b pb-3 border-slate-100">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              🧪 Ecological Impact & Chemical Degradation Risks
+            </h3>
+            <p class="text-xs text-slate-500">Addressing long-term impacts on drinking water reservoirs.</p>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-rose-50/70 border border-rose-200 rounded-lg">
+              <span class="font-bold text-rose-900 block mb-1">Microplastic Degradation & Photo-oxidation</span>
+              <p class="text-slate-700 leading-snug">
+                Decades of UV radiation and continuous wave mechanical shear erode HDPE pontoons, shedding secondary
+                microplastics that adsorb persistent organic pollutants (POPs) into the aquatic food web.
+              </p>
+            </div>
+
+            <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-lg">
+              <span class="font-bold text-amber-900 block mb-1">Heavy Metal & PFAS Module Leaching</span>
+              <p class="text-slate-700 leading-snug">
+                EVA encapsulant hydrolysis allows salty moisture to corrode silver gridlines. Damaged backsheets leach
+                Lead (Pb), Silver (Ag), Chromium (Cr), and PFAS compounds directly into drinking water sources.
+              </p>
+            </div>
+
+            <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-lg">
+              <span class="font-bold text-blue-900 block mb-1">Limnological Hypoxia & Stratification Drop</span>
+              <p class="text-slate-700 leading-snug">
+                Coverage reduces surface water temp by up to 3°C, impairing benthic macrophyte photosynthesis and
+                causing dissolved oxygen (DO) depletion that triggers benthic nutrient release.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 mt-12 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-semibold text-slate-300">Floating Solar Power Station Technical Report Interactive Dashboard</p>
+        <p class="text-[11px] text-slate-500">Compliant with DNV-RP-0584, IEC 61701, IEC 62804, and Potential Flow
+          Hydrodynamic Theory.</p>
+      </div>
+      <div class="flex space-x-4 text-[11px] text-slate-400">
+        <span>ANSYS-AQWA</span>
+        <span>•</span>
+        <span>OrcaFlex</span>
+        <span>•</span>
+        <span>PVsyst</span>
+        <span>•</span>
+        <span>SurgePV</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- External JavaScript -->
+  <script src="script.js"></script>
+</body>
+
+</html>
